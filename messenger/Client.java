@@ -1,7 +1,15 @@
-// check this for a reference: https://www.geeksforgeeks.org/multi-threaded-chat-application-set-2/?ref=lbp
-// Java implementation for multithreaded chat client
-// Save file as Client.java
-
+/*
+    PROGRAM: Client side of message (connects to server)
+    AUTHOR: Wyatt Rose
+    DESCRIPTION: The client side of the program is used to establish connections with the server and communicate with other clients,
+    this message receiver follows a 'star topology' as all trafic is routed through the server, including client to client requests.
+    The 'Client' class is used in conjunction with the 'Server' class and the 'ClientRequest' class. This relationship is used in regular
+    network communication. Since this kind of network could send any type of data, it could be implemented into a program with a GUI and
+    possibily made into a multiplayer game. The java.net library has a ton of really cool features that can also be incorperated into the program,
+    however I am currently working on a node.js implemntation which allows people to connect via a web browser. Overall node is a much better
+    alternative to java when working with server side programming, so this program is just to show some cool concepts that I've picked up on. 
+    Especially with concurrent programming (multiple threads of of execution).
+*/
 import java.io.*; // used for data streams
 import java.net.*; // used for sockets and IP address
 import java.util.Scanner; // used for command line input
@@ -18,7 +26,7 @@ public class Client
         // initialize a new scanner for command-line input
         Scanner in = new Scanner(System.in);
 
-        // get the ip of the localhost, this usually defaults to 127.0.0.1
+        // get the ip of the localhost, this should return 127.0.0.1
         InetAddress ip = InetAddress.getByName("localhost");
 
         // start a new connection on the specified port (in this case the port is defined in 'Server'
