@@ -64,42 +64,57 @@ public class Server {
     }
 }
 
+// the clientRequest class is instanciated in 'Server' when a new request from a client comes in
 class ClientRequest implements Runnable {
 
-    private Scanner scanner;
-    private String name;
-    private Socket socket;
-    boolean isActive;
-    public final DataInputStream input;
-    public final DataOutputStream output;
-
+    // the fields of this class represent different parts of a client request:
+    private String name; // the name of the client (right now it can't be changed by the client, however this can be adjusted in the server class)
+    private Socket socket; // the socket that the request is located on
+    boolean isActive; // if the request is active (if the user is currently on localhost)
+    public final DataInputStream input; // input stream from the socket
+    public final DataOutputStream output; // output stream from the socket
+    
+    // constructor for ClientRequest, used to initialze all the fields
     public ClientRequest(Socket socket, String name, DataInputStream input, DataOutputStream output) {
         this.socket = socket;
         this.name = name;
         this.input = input;
         this.output = output;
-        this.isActive = true;
+        this.isActive = true; // if a clientRequest is constructed we set 'isActive' to true, since the client couldn't have disconnected yet
     }
 
+    // all classes that implement a runnable interface _have_ to define a 'run()' method
     @Override
     public void run() {
-
+        
+        // the current string that is received from the client
         String inputString;
-
+        
         while(true) {
 
             try {
-
+                
+                // get the input string from the client via the socket's data-stream
                 inputString = input.readUTF();
-
+                
+                // print out the input-string from the client (this goes directly to the server cmd prompt)
                 System.out.println(inputString);
-
+                
+                // this is where different operations can occur based on the string sent to the servr, this is a simple 'exit' operation
                 if(inputString.equals("exit")) {
-                    this.isActive = false;
-                    this.socket.close();
-                    break;
+                    this.isActive = false; // although the clientrequest will still be in the list, it will be set to inactive
+                    this.socket.close(); // terminate the connection
+                    break; // break to close the datastreams
                 }
 
+                /*
+                The following code let's the user define a message and a recipient, this is done through a request to the server that looks
+                like this: "message#user", all usernames are given by default in the order they connect to the server, so the first person
+                to connect will be "user0". Since I won't be able to show this working in school (due to the restricted networks) I can still
+                send a message to myself.
+                */
+                
+                // A string tokenizer divides strings based on a defined token, the token is called a delimiter
                 StringTokenizer rawMessage = new StringTokenizer(inputString, "#");
 
                 // get the first half of the message (everything before the delimiter)
@@ -110,10 +125,10 @@ class ClientRequest implements Runnable {
 
                 // search for the recipient in the connected devices list
                 // clientRequests is what stores all of the active clients'
-                for(ClientRequest cr : Server.requests) {
-                    if(cr.name.equals(recipient) && cr.isActive) {
-                        cr.output.writeUTF(this.name+" : "+message);
-                        break; // break since messages have been sent
+                for(ClientRequest cr : Server.requests) { // loop through all the requests
+                    if(cr.name.equals(recipient) && cr.isActive) { // check if the current client in the list matches the username
+                        cr.output.writeUTF(this.name+" : "+message); // if the recipient matches, send the message to them via their output stream
+                        break; // break since the requested client has been found!
                     }
                 }
 
